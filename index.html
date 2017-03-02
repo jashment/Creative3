@@ -1,0 +1,70 @@
+<!-- includes -->
+<script src="../../bower_components/angular/angular.js"></script>
+<script src="../../bower_components/rltm/web/rltm.js"></script>
+<script src="../../angular-chat.js"></script>
+
+<!-- add module to angular -->
+<script>
+var chat = angular.module( 'BasicChat', ['chat'] );
+</script>
+
+<!-- configuration -->
+<script>
+angular.module('chat').constant('config', {
+    rltm: {
+        service: "pubnub",
+        config: {
+            publishKey: "demo",
+            subscribeKey: "demo"
+        }
+    }
+});
+</script>
+
+<!-- controller -->
+<script>
+chat.controller( 'chat', [ 'Messages', '$scope', function( Messages, $scope ) {
+
+    // Message Inbox
+    $scope.messages = [];
+
+    Messages.user({id: "support-agent", name: "Anonymous"});
+
+    // Receive Messages
+    Messages.receive(function(message) {
+        $scope.messages.push(message);
+    });
+
+    // Send Messages
+    $scope.send = function() {
+        Messages.send({ 
+            data: $scope.textbox
+        });
+	$scope.textbox = "";
+    };
+
+    $scope.setName = function(){
+	Messages.user({id: "support-agent", name: $scope.username});
+    }
+
+}]);
+</script>
+
+<!-- view -->
+<div ng-app="BasicChat">
+    <div ng-controller="chat">
+        <div ng-repeat="message in messages">
+            <strong>{{message.user.name}}:</strong>
+            <span>{{message.data}}</span>
+        </div>
+        <form ng-submit="send()">
+            <input ng-model="textbox" placeholder = "message">
+            <input type="submit" value="send message">
+        </form>
+
+        <form ng-submit="setName()">
+            <input ng-model="username" placeholder="username">
+	    <input type="submit" value="set">
+        </form>
+    </div>
+</div>
